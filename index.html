@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QA Review Wheel</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/logo/veriforce-symbol-colour.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <img class="logo" src="assets/logo/veriforce-logo-colour.svg" alt="Veriforce Canada">
+    <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="true">Sound on</button>
+  </header>
+
+  <main class="layout">
+    <section class="panel panel--form" aria-labelledby="formTitle">
+      <h1 id="formTitle">Who's reviewing it?</h1>
+      <p class="lead">Tell us about your asset, then spin the wheel to pick the colleague who reviews it before it's published.</p>
+
+      <div class="asana-box" id="asanaBox">
+        <p class="asana-box__text" id="asanaState">Checking your Asana connection…</p>
+        <button class="vf-btn vf-btn--secondary vf-btn--sm" id="asanaBtn" type="button" hidden>Connect Asana</button>
+      </div>
+
+      <form id="assetForm" novalidate>
+        <label class="field">
+          <span class="field__label">Your name</span>
+          <select id="author" required>
+            <option value="">Choose your name</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Asset name</span>
+          <input id="assetName" type="text" maxlength="120" placeholder="e.g. October newsletter" required>
+        </label>
+
+        <label class="field">
+          <span class="field__label">What should the reviewer check?</span>
+          <textarea id="description" rows="4" maxlength="500" placeholder="A short description of the asset and what you need from the review" required></textarea>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Link to the asset <span class="optional">(optional)</span></span>
+          <input id="assetLink" type="url" placeholder="https://">
+        </label>
+
+        <label class="field">
+          <span class="field__label">Review due by</span>
+          <input id="dueDate" type="date" required>
+        </label>
+      </form>
+    </section>
+
+    <section class="panel panel--wheel" aria-label="Reviewer wheel">
+      <div class="wheel-wrap" id="wheelWrap">
+        <svg class="pointer" id="pointer" viewBox="0 0 40 48" aria-hidden="true">
+          <path d="M20 46 L4 10 Q2 2 10 2 L30 2 Q38 2 36 10 Z" />
+        </svg>
+        <canvas id="wheel" width="960" height="960" role="img" aria-label="Wheel of reviewer names"></canvas>
+        <div class="hub" aria-hidden="true"><img src="assets/logo/veriforce-symbol-colour.svg" alt=""></div>
+      </div>
+
+      <p class="status" id="status" aria-live="polite">Fill in the form to unlock the wheel.</p>
+      <button class="vf-btn vf-btn--primary vf-btn--lg" id="spinBtn" type="button" disabled>Spin the wheel</button>
+    </section>
+  </main>
+
+  <div class="result" id="result" hidden>
+    <div class="result__card" role="dialog" aria-modal="true" aria-labelledby="resultName">
+      <p class="result__kicker">Your reviewer is</p>
+      <p class="result__name" id="resultName"></p>
+      <p class="result__asset" id="resultAsset"></p>
+      <p class="result__status" id="resultStatus" aria-live="polite"></p>
+      <div class="result__actions">
+        <a class="vf-btn vf-btn--primary" id="taskLink" href="#" target="_blank" rel="noopener" hidden>Open the task in Asana</a>
+        <a class="vf-btn vf-btn--primary" id="emailBtn" href="#" hidden>Open the email</a>
+        <button class="vf-btn vf-btn--secondary" id="doneBtn" type="button">Review another asset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="result" id="connect" hidden>
+    <div class="result__card connect__card" role="dialog" aria-modal="true" aria-labelledby="connectTitle">
+      <h2 id="connectTitle">Connect your Asana</h2>
+      <p>Do this once on each computer. Then every spin creates the review task and assigns it for you.</p>
+      <ol class="steps">
+        <li>In Asana, click your profile photo, then <strong>Settings</strong> and <strong>Apps</strong>.</li>
+        <li>Click <strong>View developer console</strong>, then <strong>Create new token</strong>.</li>
+        <li>Name it <strong>QA Review Wheel</strong>, agree to the terms, and copy the token.</li>
+        <li>Paste it below.</li>
+      </ol>
+      <form id="connectForm" novalidate>
+        <label class="field">
+          <span class="field__label">Your Asana token</span>
+          <input id="tokenInput" type="password" autocomplete="off" spellcheck="false" required>
+        </label>
+        <p class="connect__note">Your token stays in this browser and is sent only to Asana. Don't paste it on a shared computer.</p>
+        <p class="connect__error" id="connectError" aria-live="polite"></p>
+        <div class="result__actions">
+          <button class="vf-btn vf-btn--primary" id="connectSubmit" type="submit">Connect</button>
+          <button class="vf-btn vf-btn--secondary" id="connectCancel" type="button">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
