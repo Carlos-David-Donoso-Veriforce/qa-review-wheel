@@ -36,6 +36,8 @@
   const resultAsset = $("resultAsset");
   const resultStatus = $("resultStatus");
   const emailBtn = $("emailBtn");
+  const resultKicker = $("resultKicker");
+  const availability = $("availability");
   const taskLink = $("taskLink");
   const asanaState = $("asanaState");
   const asanaBtn = $("asanaBtn");
@@ -49,6 +51,20 @@
 
   const team = CONFIG.team.map((n) => String(n).trim()).filter(Boolean);
   const away = new Set(CONFIG.away.map((n) => String(n).trim()));
+
+  // Shown above the reviewer's name, picked at random after each spin.
+  const KICKERS = [
+    "Your reviewer is",
+    "The Wheel never lies.",
+    "Do. Or do not. There is no try.",
+    "Welcome to the Fellowship",
+    "The QA gods have chosen.",
+    "A reviewer emerges.",
+    "May the comments be constructive.",
+    "Good luck. You'll need it.",
+    "There is no fate but what we make for ourselves, except this.",
+  ];
+  let lastKicker = -1;
 
   let rotation = 0;
   let spinning = false;
@@ -91,7 +107,7 @@
 
   function formIsValid() {
     return author.value && assetName.value.trim() && description.value.trim() && dueDate.value &&
-      (!assetLink.value.trim() || assetLink.checkValidity());
+      assetLink.value.trim() && assetLink.checkValidity();
   }
 
   /* ---------- Wheel ---------- */
@@ -105,9 +121,49 @@
     return out;
   }
 
+  /* ---------- Reviewer availability ---------- */
+  const availabilityBoxes = {};
+  team.forEach((name) => {
+    const label = document.createElement("label");
+    label.className = "check";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = !away.has(name);
+    box.addEventListener("change", () => {
+      if (box.checked) away.delete(name);
+      else away.add(name);
+      updateCandidates();
+      refresh();
+    });
+    const text = document.createElement("span");
+    text.textContent = name;
+    label.append(box, text);
+    availability.appendChild(label);
+    availabilityBoxes[name] = { label, box, text };
+  });
+
+  // The author can't review their own asset, so their box is locked.
+  function renderAvailability() {
+    team.forEach((name) => {
+      const { label, box, text } = availabilityBoxes[name];
+      const isAuthor = name === author.value;
+      label.classList.toggle("is-author", isAuthor);
+      box.disabled = isAuthor || spinning;
+      box.checked = !isAuthor && !away.has(name);
+      text.textContent = name;
+      if (isAuthor) {
+        const you = document.createElement("span");
+        you.className = "check__you";
+        you.textContent = " (you)";
+        text.appendChild(you);
+      }
+    });
+  }
+
   function updateCandidates() {
     candidates = team.filter((n) => !away.has(n) && n !== author.value);
     colours = pickColours(candidates.length);
+    renderAvailability();
     drawWheel();
   }
 
@@ -194,7 +250,7 @@
     wrap.setAttribute("aria-disabled", String(!ready));
     wrap.setAttribute("aria-label", ready ? "Spin the wheel" : "Wheel locked until the form is complete");
     if (team.length === 0) status.textContent = "No team members yet. Add names in config.js.";
-    else if (candidates.length === 0 && author.value) status.textContent = "Nobody is available to review right now.";
+    else if (candidates.length === 0 && author.value) status.textContent = "Nobody is available. Tick at least one reviewer.";
     else status.textContent = ready ? "Ready. Click the wheel or the button to spin." : "Fill in the form to unlock the wheel.";
   }
 
@@ -280,6 +336,7 @@
     audioCtx(); // unlock audio on the click
     form.classList.add("is-locked");
     [author, assetName, description, assetLink, dueDate].forEach((el) => (el.disabled = true));
+    renderAvailability();
     spinBtn.disabled = true;
     wrap.classList.remove("is-ready");
     wrap.classList.add("is-spinning");
@@ -343,6 +400,10 @@
       dueDate: dueDate.value,
     };
 
+    let k;
+    do { k = Math.floor(Math.random() * KICKERS.length); } while (k === lastKicker && KICKERS.length > 1);
+    lastKicker = k;
+    resultKicker.textContent = KICKERS[k];
     resultName.textContent = reviewer;
     resultAsset.textContent = `will review "${lastSubmission.assetName}" by\u00a0${formatDue(lastSubmission.dueDate).replace(/ /g, "\u00a0")}.`;
     status.textContent = `${reviewer} was picked.`;
@@ -428,28 +489,30 @@
       `The QA Review Wheel picked you to review "${s.assetName}" before it's published.`,
       "",
       `What to check: ${s.description}`,
-      s.link ? `Link: ${s.link}` : "",
+      `Link: ${s.link}`,
       `Due: ${formatDue(s.dueDate)}`,
       "",
       "Thanks,",
       s.author,
     ].filter((line, i, arr) => !(line === "" && arr[i - 1] === "")).join("\n");
-    const params = [];
+    // Opens a new message in Outlook (Microsoft 365), whatever the computer's default mail app is.
+    const params = ["to=" + encodeURIComponent(emailFor(s.reviewer))];
     if (CONFIG.asanaProjectEmail) params.push("cc=" + encodeURIComponent(CONFIG.asanaProjectEmail));
     params.push("subject=" + encodeURIComponent(subject), "body=" + encodeURIComponent(body));
-    emailBtn.href = `mailto:${encodeURIComponent(emailFor(s.reviewer))}?${params.join("&")}`;
+    emailBtn.href = "https://outlook.office.com/mail/deeplink/compose?" + params.join("&");
     emailBtn.hidden = false;
     setResultStatus(message);
   }
 
   emailBtn.addEventListener("click", () => {
-    setResultStatus("Your email is ready. Press Send in your email app to finish.", "success");
+    setResultStatus("Your email is ready in Outlook. Press Send to finish.", "success");
   });
 
   function closeResult() {
     result.hidden = true;
     form.classList.remove("is-locked");
     [author, assetName, description, assetLink, dueDate].forEach((el) => (el.disabled = false));
+    renderAvailability();
     assetName.value = "";
     description.value = "";
     assetLink.value = "";

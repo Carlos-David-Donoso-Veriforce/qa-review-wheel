@@ -103,6 +103,8 @@ h1 {
 }
 
 .panel--wheel {
+  position: sticky;
+  top: 24px;
   background: var(--vf-mist-blue-50);
   border-radius: var(--radius-lg);
   padding: 40px 32px 40px;
@@ -288,7 +290,7 @@ form.is-locked input, form.is-locked select, form.is-locked textarea { backgroun
   .site-header { padding: 16px; }
   .logo { width: 150px; }
   h1 { font-size: calc(var(--type-x) * 2); }
-  .panel--wheel { padding: 32px 16px; }
+  .panel--wheel { padding: 32px 16px; position: static; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -326,3 +328,41 @@ form.is-locked input, form.is-locked select, form.is-locked textarea { backgroun
 .connect__note { font-size: calc(var(--type-x) * 0.875); }
 .connect__error { min-height: 1.3em; font-weight: 500; color: var(--vf-ink-blue); }
 .connect__card .result__actions { justify-content: flex-start; }
+
+/* --- Reviewer availability --- */
+.availability { border: 0; margin: 0; padding: 0; min-width: 0; }
+.availability legend { padding: 0; margin-bottom: 4px; }
+.field__hint { margin: 0 0 4px; font-size: calc(var(--type-x) * 0.875); text-wrap: pretty; }
+.availability__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  padding: 16px 20px;
+  border: 1.5px solid var(--keyline);
+  border-radius: var(--radius-md);
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  min-height: 32px;
+}
+.check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  flex: none;
+  accent-color: var(--vf-blue);
+  cursor: pointer;
+}
+.check.is-author { cursor: default; }
+.check.is-author input { cursor: default; }
+.check__you { color: var(--vf-ink-blue); font-size: calc(var(--type-x) * 0.875); }
+.connect__card a { color: var(--vf-blue); text-underline-offset: 3px; }
+.connect__card a:hover { color: var(--vf-ink-blue); }
+
+@media (max-width: 420px) {
+  .availability__list { grid-template-columns: 1fr; }
+}

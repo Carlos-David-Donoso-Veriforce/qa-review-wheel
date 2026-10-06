@@ -16,8 +16,8 @@
 
   <main class="layout">
     <section class="panel panel--form" aria-labelledby="formTitle">
-      <h1 id="formTitle">Who's reviewing it?</h1>
-      <p class="lead">Tell us about your asset, then spin the wheel to pick the colleague who reviews it before it's published.</p>
+      <h1 id="formTitle">Wheel of review</h1>
+      <p class="lead">Tell us about your asset, then spin the wheel and let fate pick the colleague who reviews it before it's published.</p>
 
       <div class="asana-box" id="asanaBox">
         <p class="asana-box__text" id="asanaState">Checking your Asana connection…</p>
@@ -43,14 +43,20 @@
         </label>
 
         <label class="field">
-          <span class="field__label">Link to the asset <span class="optional">(optional)</span></span>
-          <input id="assetLink" type="url" placeholder="https://">
+          <span class="field__label">Link to the asset</span>
+          <input id="assetLink" type="url" placeholder="https://" required>
         </label>
 
         <label class="field">
           <span class="field__label">Review due by</span>
           <input id="dueDate" type="date" required>
         </label>
+
+        <fieldset class="field availability">
+          <legend class="field__label">Reviewer availability</legend>
+          <p class="field__hint">Untick anyone who can't review right now. The wheel updates as you go.</p>
+          <div class="availability__list" id="availability"></div>
+        </fieldset>
       </form>
     </section>
 
@@ -70,13 +76,13 @@
 
   <div class="result" id="result" hidden>
     <div class="result__card" role="dialog" aria-modal="true" aria-labelledby="resultName">
-      <p class="result__kicker">Your reviewer is</p>
+      <p class="result__kicker" id="resultKicker">Your reviewer is</p>
       <p class="result__name" id="resultName"></p>
       <p class="result__asset" id="resultAsset"></p>
       <p class="result__status" id="resultStatus" aria-live="polite"></p>
       <div class="result__actions">
         <a class="vf-btn vf-btn--primary" id="taskLink" href="#" target="_blank" rel="noopener" hidden>Open the task in Asana</a>
-        <a class="vf-btn vf-btn--primary" id="emailBtn" href="#" hidden>Open the email</a>
+        <a class="vf-btn vf-btn--primary" id="emailBtn" href="#" target="_blank" rel="noopener" hidden>Open the email in Outlook</a>
         <button class="vf-btn vf-btn--secondary" id="doneBtn" type="button">Review another asset</button>
       </div>
     </div>
@@ -87,8 +93,7 @@
       <h2 id="connectTitle">Connect your Asana</h2>
       <p>Do this once on each computer. Then every spin creates the review task and assigns it for you.</p>
       <ol class="steps">
-        <li>In Asana, click your profile photo, then <strong>Settings</strong> and <strong>Apps</strong>.</li>
-        <li>Click <strong>View developer console</strong>, then <strong>Create new token</strong>.</li>
+        <li>Open <a href="https://app.asana.com/0/my-apps" target="_blank" rel="noopener">Asana's token page</a> and click <strong>Create new token</strong>.</li>
         <li>Name it <strong>QA Review Wheel</strong>, agree to the terms, and copy the token.</li>
         <li>Paste it below.</li>
       </ol>
